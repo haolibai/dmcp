@@ -12,29 +12,53 @@ import torch.multiprocessing as mp
 gpu_id = None
 
 
-def init_dist(distributed=True, backend='nccl'):
+# def init_dist(distributed=True, backend='nccl'):
+#     global gpu_id
+#
+#     mp.set_start_method('spawn')
+#     if distributed:
+#         if dist.is_initialized():
+#             return
+#
+#         # for slurm
+#         if os.environ.get('SLURM_PROCID', None) is not None:
+#             rank, world_size, url = _slurm_init_distributed()
+#
+#         # for environment variable
+#         else:
+#             rank = int(os.environ['RANK'])
+#             world_size = int(os.environ['WORLD_SIZE'])
+#             url = "tcp://127.0.0.1:6501"
+#
+#         num_gpus = torch.cuda.device_count()
+#         gpu_id = rank % num_gpus
+#         torch.cuda.set_device(gpu_id)
+#
+#         dist.init_process_group(backend, init_method=url, rank=rank, world_size=world_size)
+
+def init_dist(distributed=True,
+                   backend='nccl',
+                   master_ip='tcp://127.0.0.1',
+                   port=6501):
+    if not distributed:
+        return
+
+    if mp.get_start_method(allow_none=True) is None:
+        mp.set_start_method('spawn')
     global gpu_id
-
-    mp.set_start_method('spawn')
-    if distributed:
-        if dist.is_initialized():
-            return
-
-        # for slurm
-        if os.environ.get('SLURM_PROCID', None) is not None:
-            rank, world_size, url = _slurm_init_distributed()
-
-        # for environment variable
-        else:
-            rank = int(os.environ['RANK'])
-            world_size = int(os.environ['WORLD_SIZE'])
-            url = None
-
-        num_gpus = torch.cuda.device_count()
-        gpu_id = rank % num_gpus
-        torch.cuda.set_device(gpu_id)
-
-        dist.init_process_group(backend, init_method=url, rank=rank, world_size=world_size)
+    os.environ['MASTER_ADDR'] = master_ip
+    os.environ['MASTER_PORT'] = str(port)
+    rank = int(os.environ['RANK'])
+    world_size = int(os.environ['WORLD_SIZE'])
+    num_gpus = torch.cuda.device_count()
+    gpu_id = rank % num_gpus
+    torch.cuda.set_device(gpu_id)
+    dist_url = master_ip + ':' + str(port)
+    dist.init_process_group(backend=backend, init_method=dist_url, \
+        world_size=world_size, rank=rank)
+    print("dist initialized. master_ip: %s, port: %s, rank: %d/%d" % \
+        (master_ip, str(port), rank, world_size))
+    return rank, world_size
 
 
 def _slurm_init_distributed():

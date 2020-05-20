@@ -1,0 +1,13 @@
+version: 1
+kind: standalone
+jobname: dmcp-exp
+container:
+  image:
+    docker.oa.com/g_tfplus/ai-drug:tf1.12-deepchem2.1.1-rdkit2018.03-pytorch1.0.1-keras2.2.4-java8-hadoop2.7.5 
+  resources:
+    nvidia.com/gpu: 2
+  env:
+  - name: SEVEN_HTTP_FORWARD_PORT
+  - name: TASK_ID
+    value: 1
+

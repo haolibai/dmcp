@@ -127,7 +127,8 @@ class NormalRunner:
         chk_dir = os.path.join(self.config.save_path, 'checkpoints')
         if not os.path.exists(chk_dir):
             os.makedirs(chk_dir)
-        name = time.strftime('%m%d_%H%M.pth')
+        # name = time.strftime('%m%d_%H%M.pth')
+        name = 'model.pth'
         name = os.path.join(chk_dir, name)
 
         state = {'model': self.model.state_dict()}
@@ -151,7 +152,7 @@ class NormalRunner:
 
     def get_model(self):
         return self.model
-    
+
     @dist.master
     def _info(self, msg, *args, **kwargs):
         self.logger.info(msg, *args, **kwargs)

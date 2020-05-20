@@ -8,6 +8,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
+from pdb import set_trace as br
 
 
 def pil_loader(img_str):
@@ -71,6 +72,7 @@ def get_image_net(config):
         assert k in ['test_resize', 'rotation', 'color_jitter']
 
     rotation = config.augmentation.get('rotation', 0)
+    # NOTE: color jitting.
     if rotation > 0:
         transform_train.append(transforms.RandomRotation(rotation))
     color_jitter = config.augmentation.get('color_jitter', None)

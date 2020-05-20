@@ -17,6 +17,7 @@ from runner import USRunner, DMCPRunner, NormalRunner
 from utils.lr_scheduler import WarmUpCosineLRScheduler
 import utils.data as data
 import utils.distributed as dist
+from pdb import set_trace as br
 
 
 def init(config):
@@ -24,7 +25,7 @@ def init(config):
     np.random.seed(random_seed)
     torch.manual_seed(random_seed)
     random.seed(random_seed)
-    dist.init_dist(config.distributed.enable)
+    dist.init_dist(config.distributed.enable, port=config.port)
 
 
 def check_dist_init(config, logger):
@@ -63,6 +64,7 @@ def get_config(args):
 
     config.arch.target_flops = args.flops
     config.dataset.path = args.data
+    config.port = args.port
     if config.model.type.find('Adaptive') > -1:
         assert args.chcfg is not None, "error: miss channel config"
         config.model.kwargs.ch_cfg = args.chcfg
@@ -74,7 +76,7 @@ def get_logger(config, name='global_logger'):
     save_dir = config.model.type + '_'
     if config.get('arch', False):
         save_dir += str(config.arch.target_flops) + '_'
-    save_dir = time.strftime(save_dir + '%m%d%H')
+    save_dir = time.strftime(save_dir + '%m%d_%H%M%S')
     save_dir = os.path.join(config.save_path, save_dir)
 
     if dist.is_master():

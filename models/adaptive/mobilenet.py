@@ -3,6 +3,7 @@
 import numpy as np
 import os
 import torch.nn as nn
+from pdb import set_trace as br
 
 
 class AdaptiveInvertedResidual(nn.Module):
@@ -26,7 +27,6 @@ class AdaptiveInvertedResidual(nn.Module):
         conv3_in_ch, conv3_out_ch = residual_settings['conv3']
         self.conv3 = nn.Conv2d(conv3_in_ch, conv3_out_ch, 1, bias=False)
         self.bn3 = nn.BatchNorm2d(conv3_out_ch)
-
         self.inplanes = conv1_in_ch if t != 1 else conv2_in_ch
         self.outplanes = conv3_out_ch
 
@@ -56,7 +56,6 @@ class AdaptiveInvertedResidual(nn.Module):
 class AdaptiveMobileNetV2(nn.Module):
     def __init__(self, ch_cfg, num_classes=1000, input_size=224):
         super(AdaptiveMobileNetV2, self).__init__()
-
         channels = np.load(os.path.join(ch_cfg, 'sample.npy'), allow_pickle=True).item()
         self.num_classes = num_classes
         self.relu = nn.ReLU6(inplace=True)

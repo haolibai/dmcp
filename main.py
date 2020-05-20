@@ -1,9 +1,9 @@
 # -*- coding:utf-8  -*-
-
+import os
 import argparse
 import utils.distributed as dist
 import utils.tools as tools
-
+from pdb import set_trace as br
 
 parser = argparse.ArgumentParser(description='DMCP Implementation')
 parser.add_argument('-C', '--config', required=True)
@@ -11,6 +11,9 @@ parser.add_argument('-M', '--mode', default='eval')
 parser.add_argument('-F', '--flops', required=True)
 parser.add_argument('-D', '--data', required=True)
 parser.add_argument('--chcfg', default=None)
+parser.add_argument('--port', default=6501, help='dist port')
+parser.add_argument('--local_rank', default=None)
+parser.add_argument('--gpu_id', default='0')
 
 
 def train(config, runner, loaders, checkpoint, tb_logger):
@@ -38,6 +41,7 @@ def evaluate(runner, loaders):
 
 def main():
     args = tools.get_args(parser)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
     config = tools.get_config(args)
     tools.init(config)
     tb_logger, logger = tools.get_logger(config)
